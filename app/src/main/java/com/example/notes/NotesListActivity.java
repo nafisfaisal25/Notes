@@ -6,15 +6,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import com.example.notes.Adapter.NoteRecyclerAdapter;
 import com.example.notes.Model.Note;
+import com.example.notes.Model.NoteClickListener;
 import com.example.notes.Util.NoteItemDecorator;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotesListActivity extends AppCompatActivity {
+public class NotesListActivity extends AppCompatActivity implements NoteClickListener {
 
     private static final String TAG = "NotesListActivity";
 
@@ -30,14 +32,14 @@ public class NotesListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notes_list);
         mRecyclerView = findViewById(R.id.recycler_view);
-        populateNoteList();
         initRecyclerView();
+        populateNoteList();
         setSupportActionBar((Toolbar) findViewById(R.id.notes_toolbar));
         setTitle("Notes");
     }
 
     private void initRecyclerView() {
-        mNoteRecyclerViewAdapter = new NoteRecyclerAdapter(mNoteList);
+        mNoteRecyclerViewAdapter = new NoteRecyclerAdapter(mNoteList, this);
         mRecyclerView.setAdapter(mNoteRecyclerViewAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         NoteItemDecorator itemDecorator = new NoteItemDecorator(10);
@@ -45,23 +47,17 @@ public class NotesListActivity extends AppCompatActivity {
     }
 
     private void populateNoteList() {
-        Note note = new Note("Reminder"," ", "March 29, 2020");
-        mNoteList.add(note);
-        note = new Note("Todo"," ", "March 30, 2020");
-        mNoteList.add(note);
-        note = new Note("Exersize"," ", "March 21, 2020");
-        mNoteList.add(note);
-        note = new Note("Todo"," ", "March 30, 2020");
-        mNoteList.add(note);
-        note = new Note("Exersize"," ", "March 21, 2020");
-        mNoteList.add(note);
+        for(int i=0;i<100;i++){
+            Note note = new Note();
+            note.setTitle("Note #: " + i);
+            note.setTimestamp("Mar, 2020");
+            mNoteList.add(note);
+        }
+        mNoteRecyclerViewAdapter.notifyDataSetChanged();
+    }
 
-        note = new Note("Todo"," ", "March 30, 2020");
-        mNoteList.add(note);
-        note = new Note("Exersize"," ", "March 21, 2020");
-        mNoteList.add(note);
-
-
-
+    @Override
+    public void onNoteClick(int position) {
+        Log.e(TAG, "onNoteClick: "+ position);
     }
 }

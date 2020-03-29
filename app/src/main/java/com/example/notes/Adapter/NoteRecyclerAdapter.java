@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.notes.Model.Note;
+import com.example.notes.Model.NoteClickListener;
 import com.example.notes.R;
 
 import java.util.List;
@@ -16,9 +17,11 @@ import androidx.recyclerview.widget.RecyclerView;
 public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapter.ViewHolder> {
 
     private List<Note> mNoteList;
+    private NoteClickListener mNoteClickListener;
 
-    public NoteRecyclerAdapter(List<Note> notes) {
+    public NoteRecyclerAdapter(List<Note> notes, NoteClickListener noteClickListener) {
         this.mNoteList = notes;
+        this.mNoteClickListener = noteClickListener;
     }
 
     @NonNull
@@ -40,13 +43,20 @@ public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapte
         return mNoteList.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView titleTextView;
         TextView timestampTeTextView;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             titleTextView = itemView.findViewById(R.id.note_title);
             timestampTeTextView = itemView.findViewById(R.id.note_timestamp);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            mNoteClickListener.onNoteClick(getAdapterPosition());
         }
     }
+
 }
