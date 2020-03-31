@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:id="@+id/notes_toolbar"
-        android:background="@color/colorPrimaryDark"
+        android:background="@color/colorPrimary"
         app:layout_scrollFlags="scroll|enterAlways">
     </androidx.appcompat.widget.Toolbar>
   </com.google.android.material.appbar.AppBarLayout>
