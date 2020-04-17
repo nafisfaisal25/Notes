@@ -2,22 +2,40 @@ package com.example.notes;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.os.Bundle;
+import android.print.PrinterId;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.notes.Model.Note;
 
 public class NoteActivity extends AppCompatActivity {
+    private static final String TAG = "NoteActivity";
+    private static final int EDIT_MODE_ENABLED = 1;
+    private static final int EDIT_MODE_DISABLED = 0;
 
     //ui components
     private LinedEditText mLinedEditText;
     private EditText mEditTitle;
     private TextView mViewTitle;
+    private ImageButton mCheckButton;
+    private ImageButton mBackButton;
+    private RelativeLayout mCheckBoxContainer;
+    private RelativeLayout mBackArrowContainer;
 
     //var
     private boolean mIsNewNode;
     private Note mInitialNote;
+    private GestureDetector mGestureDetector;
+    private int mMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,19 +44,107 @@ public class NoteActivity extends AppCompatActivity {
         mLinedEditText = findViewById(R.id.note_text);
         mEditTitle = findViewById(R.id.note_edit_title);
         mViewTitle = findViewById(R.id.note_text_title);
+        mCheckButton = findViewById(R.id.toolbar_check);
+        mBackButton = findViewById(R.id.toolbar_back_arrow);
+        mCheckBoxContainer = findViewById(R.id.check_container);
+        mBackArrowContainer = findViewById(R.id.back_arrow_container);
         if(isNewNode()) {
             setNewNoteProperty();
+            enableEditMode();
         } else {
             setNoteProperty();
+            disableInteraction();
         }
+        setListeners();
+    }
 
+    private void setListeners() {
+        mCheckButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                disableEditMode();
+            }
+        });
 
+        mBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        mViewTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                enableEditMode();
+                mEditTitle.requestFocus();
+                mEditTitle.setSelection(mEditTitle.length());
+            }
+        });
+
+        mLinedEditText.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return mGestureDetector.onTouchEvent(event);
+            }
+        });
+
+        mGestureDetector = new GestureDetector(this, new GestureDetector.OnGestureListener() {
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return false;
+            }
+
+            @Override
+            public void onShowPress(MotionEvent e) {
+
+            }
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                return false;
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                return false;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                return false;
+            }
+        });
+        mGestureDetector.setOnDoubleTapListener(new GestureDetector.OnDoubleTapListener() {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                return false;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                Log.e(TAG, "onDoubleTap: double tapped!");
+                enableEditMode();
+                return false;
+            }
+
+            @Override
+            public boolean onDoubleTapEvent(MotionEvent e) {
+                return false;
+            }
+        });
     }
 
     boolean isNewNode() {
         if(getIntent().hasExtra("selected_note")){
             mInitialNote = getIntent().getParcelableExtra("selected_note");
             mIsNewNode = false;
+            mMode = EDIT_MODE_DISABLED;
             return false;
         }
         mIsNewNode = true;
@@ -54,5 +160,54 @@ public class NoteActivity extends AppCompatActivity {
         mLinedEditText.setText(mInitialNote.getContent());
         mEditTitle.setText(mInitialNote.getTitle());
         mViewTitle.setText(mInitialNote.getTitle());
+    }
+
+    private void enableEditMode() {
+        mBackArrowContainer.setVisibility(View.GONE);
+        mCheckBoxContainer.setVisibility(View.VISIBLE);
+        mEditTitle.setVisibility(View.VISIBLE);
+        mViewTitle.setVisibility(View.GONE);
+        mMode = EDIT_MODE_ENABLED;
+        enableInterAction();
+    }
+
+    private void disableEditMode() {
+        mBackArrowContainer.setVisibility(View.VISIBLE);
+        mCheckBoxContainer.setVisibility(View.GONE);
+        mEditTitle.setVisibility(View.GONE);
+        mViewTitle.setVisibility(View.VISIBLE);
+        mMode = EDIT_MODE_DISABLED;
+        disableInteraction();
+        hideSoftKeyboard();
+    }
+
+    private void hideSoftKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        View view = this.getCurrentFocus();
+        if (view == null) {
+            view = new View(this);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(),0);
+    }
+
+    private void disableInteraction() {
+        mLinedEditText.setFocusableInTouchMode(false);
+        mLinedEditText.setCursorVisible(false);
+        mLinedEditText.setKeyListener(null);
+    }
+
+    private void enableInterAction() {
+        mLinedEditText.setFocusableInTouchMode(true);
+        mLinedEditText.setCursorVisible(true);
+        mLinedEditText.setKeyListener(new EditText(this).getKeyListener());
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mMode == EDIT_MODE_ENABLED) {
+            disableEditMode();
+        } else {
+            super.onBackPressed();
+        }
     }
 }

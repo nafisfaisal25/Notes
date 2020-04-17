@@ -8,11 +8,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import com.example.notes.Adapter.NoteRecyclerAdapter;
 import com.example.notes.Model.Note;
 import com.example.notes.Model.NoteClickListener;
 import com.example.notes.Util.NoteItemDecorator;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,21 +24,35 @@ public class NotesListActivity extends AppCompatActivity implements NoteClickLis
     private static final String TAG = "NotesListActivity";
 
     //Ui components
-    List<Note> mNoteList = new ArrayList<>();
-
-    //vars
     RecyclerView mRecyclerView;
     NoteRecyclerAdapter mNoteRecyclerViewAdapter;
+    FloatingActionButton mFab;
+
+    //vars
+    List<Note> mNoteList = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notes_list);
         mRecyclerView = findViewById(R.id.recycler_view);
+        mFab = findViewById(R.id.fab);
         initRecyclerView();
         populateNoteList();
         setSupportActionBar((Toolbar) findViewById(R.id.notes_toolbar));
         setTitle("Notes");
+        setListeners();
+    }
+
+    private void setListeners() {
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), NoteActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void initRecyclerView() {
