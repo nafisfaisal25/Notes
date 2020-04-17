@@ -1,7 +1,9 @@
 package com.example.notes;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -60,6 +62,7 @@ public class NotesListActivity extends AppCompatActivity implements NoteClickLis
         mRecyclerView.setAdapter(mNoteRecyclerViewAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         NoteItemDecorator itemDecorator = new NoteItemDecorator(10);
+        itemTouchHelper.attachToRecyclerView(mRecyclerView);
         mRecyclerView.addItemDecoration(itemDecorator);
     }
 
@@ -82,4 +85,22 @@ public class NotesListActivity extends AppCompatActivity implements NoteClickLis
         intent.putExtra("selected_note", note);
         startActivity(intent);
     }
+
+    private void removeNote(int position) {
+        mNoteList.remove(position);
+        mNoteRecyclerViewAdapter.notifyDataSetChanged();
+    }
+
+    ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.RIGHT){
+
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            removeNote(viewHolder.getAdapterPosition());
+        }
+    });
 }
