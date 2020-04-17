@@ -37,7 +37,7 @@ public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapte
         holder.titleTextView.setText(mNoteList.get(position).getTitle());
         String timeStamp = mNoteList.get(position).getTimestamp();
         timeStamp = timeStamp.replace('-',' ');
-        holder.timestampTextView.setText(timeStamp);
+        holder.timeStampTextView.setText(timeStamp);
     }
 
     @Override
@@ -47,11 +47,11 @@ public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapte
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView titleTextView;
-        TextView timestampTextView;
+        TextView timeStampTextView;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             titleTextView = itemView.findViewById(R.id.note_title);
-            timestampTextView = itemView.findViewById(R.id.note_timestamp);
+            timeStampTextView = itemView.findViewById(R.id.note_timestamp);
             itemView.setOnClickListener(this);
         }
 
