@@ -20,13 +20,14 @@
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <EditText
+    <com.example.notes.LinedEditText
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/note_text"
         android:textSize="23sp"
         android:padding="5dp"
-        android:textColor="@color/black">
-    </EditText>
+        android:textColor="@color/black"
+        android:gravity="top">
+    </com.example.notes.LinedEditText>
 
 </LinearLayout>

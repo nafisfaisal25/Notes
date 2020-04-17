@@ -50,8 +50,9 @@ public class NotesListActivity extends AppCompatActivity implements NoteClickLis
     private void populateNoteList() {
         for(int i=0;i<100;i++){
             Note note = new Note();
-            note.setTitle("Note #: " + i);
+            note.setTitle("Title #: " + i);
             note.setTimestamp("Mar, 2020");
+            note.setContent("Content #: " + i);
             mNoteList.add(note);
         }
         mNoteRecyclerViewAdapter.notifyDataSetChanged();
@@ -62,7 +63,7 @@ public class NotesListActivity extends AppCompatActivity implements NoteClickLis
         Log.e(TAG, "onNoteClick: "+ position);
         Note note = mNoteList.get(position);
         Intent intent = new Intent(this, NoteActivity.class);
-        intent.putExtra("selected_node", note);
+        intent.putExtra("selected_note", note);
         startActivity(intent);
     }
 }
