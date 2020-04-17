@@ -3,6 +3,7 @@ package com.example.notes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,6 +17,7 @@ import com.example.notes.Adapter.NoteRecyclerAdapter;
 import com.example.notes.Model.Note;
 import com.example.notes.Model.NoteClickListener;
 import com.example.notes.Util.NoteItemDecorator;
+import com.example.notes.persistence.NoteRepository;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ public class NotesListActivity extends AppCompatActivity implements NoteClickLis
 
     //vars
     List<Note> mNoteList = new ArrayList<>();
+    NoteRepository mNoteRepository;
 
 
     @Override
@@ -40,11 +43,27 @@ public class NotesListActivity extends AppCompatActivity implements NoteClickLis
         setContentView(R.layout.activity_notes_list);
         mRecyclerView = findViewById(R.id.recycler_view);
         mFab = findViewById(R.id.fab);
+        mNoteRepository = new NoteRepository(this);
         initRecyclerView();
-        populateNoteList();
+        retrieveNotes();
         setSupportActionBar((Toolbar) findViewById(R.id.notes_toolbar));
         setTitle("Notes");
         setListeners();
+    }
+
+    private void retrieveNotes() {
+        mNoteRepository.retrieveNotesTask().observe(this, new Observer<List<Note>>() {
+            @Override
+            public void onChanged(List<Note> notes) {
+                if(mNoteList.size() > 0) {
+                    mNoteList.clear();
+                }
+                if(notes != null){
+                    mNoteList.addAll(notes);
+                }
+                mNoteRecyclerViewAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     private void setListeners() {
@@ -66,17 +85,6 @@ public class NotesListActivity extends AppCompatActivity implements NoteClickLis
         mRecyclerView.addItemDecoration(itemDecorator);
     }
 
-    private void populateNoteList() {
-        for(int i=0;i<100;i++){
-            Note note = new Note();
-            note.setTitle("Title #: " + i);
-            note.setTimestamp("Mar, 2020");
-            note.setContent("Content #: " + i);
-            mNoteList.add(note);
-        }
-        mNoteRecyclerViewAdapter.notifyDataSetChanged();
-    }
-
     @Override
     public void onNoteClick(int position) {
         Log.e(TAG, "onNoteClick: "+ position);
@@ -87,8 +95,7 @@ public class NotesListActivity extends AppCompatActivity implements NoteClickLis
     }
 
     private void removeNote(int position) {
-        mNoteList.remove(position);
-        mNoteRecyclerViewAdapter.notifyDataSetChanged();
+        mNoteRepository.deleteNote(mNoteList.get(position));
     }
 
     ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.RIGHT){

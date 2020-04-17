@@ -16,6 +16,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.notes.Model.Note;
+import com.example.notes.persistence.NoteRepository;
 
 public class NoteActivity extends AppCompatActivity {
     private static final String TAG = "NoteActivity";
@@ -32,10 +33,11 @@ public class NoteActivity extends AppCompatActivity {
     private RelativeLayout mBackArrowContainer;
 
     //var
-    private boolean mIsNewNode;
-    private Note mInitialNote;
+    private Note mOldNote;
+    private Note mNewNote;
     private GestureDetector mGestureDetector;
     private int mMode;
+    private NoteRepository mNoteRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +50,7 @@ public class NoteActivity extends AppCompatActivity {
         mBackButton = findViewById(R.id.toolbar_back_arrow);
         mCheckBoxContainer = findViewById(R.id.check_container);
         mBackArrowContainer = findViewById(R.id.back_arrow_container);
+        mNoteRepository = new NoteRepository(this);
         if(isNewNode()) {
             setNewNoteProperty();
             enableEditMode();
@@ -69,7 +72,7 @@ public class NoteActivity extends AppCompatActivity {
         mBackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                onBackPressed();
             }
         });
 
@@ -142,12 +145,11 @@ public class NoteActivity extends AppCompatActivity {
 
     boolean isNewNode() {
         if(getIntent().hasExtra("selected_note")){
-            mInitialNote = getIntent().getParcelableExtra("selected_note");
-            mIsNewNode = false;
+            mOldNote = getIntent().getParcelableExtra("selected_note");
             mMode = EDIT_MODE_DISABLED;
             return false;
         }
-        mIsNewNode = true;
+        mNewNote = new Note();
         return true;
     }
 
@@ -157,9 +159,9 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     private void setNoteProperty() {
-        mLinedEditText.setText(mInitialNote.getContent());
-        mEditTitle.setText(mInitialNote.getTitle());
-        mViewTitle.setText(mInitialNote.getTitle());
+        mLinedEditText.setText(mOldNote.getContent());
+        mEditTitle.setText(mOldNote.getTitle());
+        mViewTitle.setText(mOldNote.getTitle());
     }
 
     private void enableEditMode() {
@@ -177,17 +179,14 @@ public class NoteActivity extends AppCompatActivity {
         mEditTitle.setVisibility(View.GONE);
         mViewTitle.setVisibility(View.VISIBLE);
         mMode = EDIT_MODE_DISABLED;
+        mViewTitle.setText(mEditTitle.getText().toString());
         disableInteraction();
         hideSoftKeyboard();
     }
 
     private void hideSoftKeyboard() {
         InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-        View view = this.getCurrentFocus();
-        if (view == null) {
-            view = new View(this);
-        }
-        imm.hideSoftInputFromWindow(view.getWindowToken(),0);
+        imm.hideSoftInputFromWindow(mLinedEditText.getWindowToken(),0);
     }
 
     private void disableInteraction() {
@@ -207,6 +206,7 @@ public class NoteActivity extends AppCompatActivity {
         if(mMode == EDIT_MODE_ENABLED) {
             disableEditMode();
         } else {
+            saveChanges();
             super.onBackPressed();
         }
     }
@@ -223,6 +223,40 @@ public class NoteActivity extends AppCompatActivity {
         mMode = savedInstanceState.getInt("mode");
         if (mMode == EDIT_MODE_ENABLED) {
             enableEditMode();
+        }
+    }
+
+    private  void updateNoteProperty(Note note) {
+        note.setTitle(mEditTitle.getText().toString());
+        note.setContent(mLinedEditText.getText().toString());
+        note.setTimestamp("1 may, 2020");
+    }
+
+    private void saveChanges(){
+        if(mNewNote != null) {
+            updateNoteProperty(mNewNote);
+            insertNewNote();
+        } else {
+            updateNoteProperty(mOldNote);
+            updateOldNode();
+        }
+    }
+
+    private void updateOldNode() {
+        if(!mOldNote.getContent().equals("") || !mOldNote.getTitle().equals("Note Title")) {
+            mNoteRepository.updateNote(mOldNote);
+        } else {
+            deleteNode();
+        }
+    }
+
+    private void deleteNode() {
+        mNoteRepository.deleteNote(mOldNote);
+    }
+
+    private void insertNewNote() {
+        if(!mNewNote.getContent().equals("") || !mNewNote.getTitle().equals("Note Title")) {
+            mNoteRepository.insertNoteTask(mNewNote);
         }
     }
 }
