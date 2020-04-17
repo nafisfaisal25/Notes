@@ -4,7 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.print.PrinterId;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -16,6 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.notes.Model.Note;
+import com.example.notes.Util.Utility;
 import com.example.notes.persistence.NoteRepository;
 
 public class NoteActivity extends AppCompatActivity {
@@ -89,6 +91,23 @@ public class NoteActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return mGestureDetector.onTouchEvent(event);
+            }
+        });
+
+        mEditTitle.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                mViewTitle.setText(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         });
 
@@ -179,7 +198,6 @@ public class NoteActivity extends AppCompatActivity {
         mEditTitle.setVisibility(View.GONE);
         mViewTitle.setVisibility(View.VISIBLE);
         mMode = EDIT_MODE_DISABLED;
-        mViewTitle.setText(mEditTitle.getText().toString());
         disableInteraction();
         hideSoftKeyboard();
     }
@@ -229,7 +247,7 @@ public class NoteActivity extends AppCompatActivity {
     private  void updateNoteProperty(Note note) {
         note.setTitle(mEditTitle.getText().toString());
         note.setContent(mLinedEditText.getText().toString());
-        note.setTimestamp("1 may, 2020");
+        note.setTimestamp(Utility.getTimeStamp());
     }
 
     private void saveChanges(){
